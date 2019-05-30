@@ -86,83 +86,14 @@ Once this is done, we get back a response that contains the item we added, so we
 
 ## Back End -- Uploading Photos
 
-On the back end, we're going to use a library called [multer]() to upload images. First, we need to configure multer in `server.js`:
 
-```
-// Configure multer so that it will upload to '/public/images'
-const multer = require('multer')
-const upload = multer({
-  dest: './public/images/',
-  limits: {
-    fileSize: 10000000
-  }
-});
-```
-
-This tells multer to store images in `public/images` in the current directory and limits the maximum file size.
-
-Now add the Mongoose scheme and model to `server.js`:
-
-```
-// Create a scheme for items in the museum: a title and a path to an image.
-const itemSchema = new mongoose.Schema({
-  title: String,
-  path: String,
-});
-
-// Create a model for items in the museum.
-const Item = mongoose.model('Item', itemSchema);
-```
-
-The schema tells Mongoose what properties to use in each document. Here, we create a scheme for museum items that has a title and a path, each using a string for a data type.
-
-The model tells Mongoose to create a collection called `items` that is mapped to the model named `Item`.
-
-Now we need to add support for uploading photos:
-
-```
-// Upload a photo. Uses the multer middleware for the upload and then returns
-// the path where the photo is stored in the file system.
-app.post('/api/photos', upload.single('photo'), async (req, res) => {
-  // Just a safety check
-  if (!req.file) {
-    return res.sendStatus(400);
-  }
-  res.send({
-    path: "/images/" + req.file.filename
-  });
-});
-```
-
-This sets up a REST API endpoint at `/api/photos`. A POST to this endpoint will first be given to the multer middleware. It will expect to find a file labeled with the `photo` property. This property should match what you used when creating the `formData` object. The multer middleware will automatically upload this file and store it in the file system. It will setup `req.file` to contain information about the uploaded file.
-
-We check that the file was indeed uploaded and then return the full path to the file.
-
-## Back End -- creating items
-
-```
-// Create a new item in the museum: takes a title and a path to an image.
-app.post('/api/items', async (req, res) => {
-  const item = new Item({
-    title: req.body.title,
-    path: req.body.path,
-  });
-  try {
-    await item.save();
-    res.send(item);
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
-});
-```
 
 ## Testing
 
 You will need to quit and restart the server:
 
 ```
-node server.js
+firebase serve
 ```
 
-Browse to localhost:3000 and use the admin page to upload some photos. I have placed some photos in the data folder of this repo for you. Turn on the Developer Tools and use the Network tab to monitor what is happening. Then use the `mongo` command line tool or a program like [robomongo](https://robomongo.org/) to visualize your database and see the data that is inserted.
+
